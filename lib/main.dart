@@ -14,84 +14,19 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       initialRoute: '/',
-      onUnknownRoute: (RouteSettings settings){
-        return MaterialPageRoute(builder: (BuildContext context){
+      onUnknownRoute: (RouteSettings settings) {
+        return MaterialPageRoute(builder: (BuildContext context) {
           return NotFoundPage();
         });
       },
       onGenerateRoute: MyRouter.router.generator,
-      // onGenerateRoute: (RouteSettings settings){
-      //   switch(settings.name){
-      //     case HomePage.routName:
-      //       return MaterialPageRoute(builder: (BuildContext context){
-      //         return HomePage();
-      //       });
-      //     case AboutPage.routName:
-      //       final args = settings.arguments as Map<String, dynamic>;
-      //       if(args != null && args.containsKey('id')) {
-      //         return MaterialPageRoute(
-      //           fullscreenDialog: true,
-      //           builder: (BuildContext context) {
-      //             return AboutPage(id: args['id']);
-      //           },
-      //         );
-      //       }
-      //         return MaterialPageRoute(builder: (BuildContext context){
-      //             return AboutPage();
-      //       });
-      //     case BlogPage.routName:
-      //       // final args = settings.arguments as Map<String,dynamic>;
-      //       // print(args);
-      //       return PageRouteBuilder(pageBuilder: (
-      //           BuildContext context,
-      //           Animation animation1,
-      //           Animation animation2,
-      //           ){
-      //         return BlogPage();
-      //
-      //       },
-      //       transitionsBuilder: (
-      //           BuildContext context,
-      //           Animation animation,
-      //           Animation secondaryAnimation,
-      //           child,
-      //       ){
-      //         return BlogPage();
-      //         //
-      //         // CurvedAnimation _curred = CurvedAnimation(
-      //         //   parent: animation,
-      //         //   curve: Curves.fastOutSlowIn
-      //         // );
-      //         // Animation<double> _animate =
-      //         //     Tween<double>(begin: 0.0, end: 1.0).animate(_curred);
-      //         //
-      //         // return ScaleTransition(
-      //         //     scale: _animate,
-      //         //     child: FadeTransition(
-      //         //     opacity: animation,
-      //         //     child: child,
-      //         //
-      //         // );
-      //       },
-      //       );
-      //     default:
-      //       return MaterialPageRoute(builder: (BuildContext context){
-      //         return NotFoundPage();
-      //       });
-      //   }
-      // },
-      // routes: {
-      //   '/': (BuildContext context) => HomePage(),
-      //   '/about': (BuildContext context) => AboutPage(),
-      //   '/blog': (BuildContext context) => BlogPage(),
-      // },
-      // home: MyHomePage(title: "Navigation",),
     );
   }
 }
 
 class HomePage extends StatefulWidget {
   static const routName = "/";
+
   HomePage({Key? key}) : super(key: key);
 
   @override
@@ -111,47 +46,28 @@ class _HomePageState extends State<HomePage> {
             TextButton(
                 child: Text('About'),
                 onPressed: () {
-                  MyRouter.router.navigateTo(
-                      context,
-                      "/about",
-                    transition: TransitionType.cupertino
-                  );
-
-                  // Navigator.of(context).pushNamed('/about');
-
-                  // Navigator.of(context)
-                  //     .push(MaterialPageRoute(builder: (BuildContext context) {
-                  //   return AboutPage();
-                  // }));
+                  MyRouter.router.navigateTo(context, "/about",
+                      transition: TransitionType.cupertino);
                 }),
             TextButton(
               child: Text("About with arguments"),
-                onPressed: (){
-                Navigator.of(context).pushNamed(
-                    "/about/6161616",
-                );
-            },
+              onPressed: () {
+                MyRouter.router.navigateTo(context, "/blog");
+              },
             ),
             TextButton(
                 child: Text("Blog"),
                 onPressed: () {
-                  Navigator.of(context).pushNamed(
-                      '/blog',
-                      // arguments: {"id": 566466},
-                      );
-                  // Navigator.of(context)
-                  //     .push(MaterialPageRoute(builder: (BuildContext context) {
-                  //   return BlogPage();
-                  // }));
+                  MyRouter.router.navigateTo(context, "/blog");
                 }),
             TextButton(
                 child: Text("Not Found"),
                 onPressed: () {
                   Navigator.of(context).pushNamed('/notasds');
-                  // Navigator.of(context)
-                  //     .push(MaterialPageRoute(builder: (BuildContext context) {
-                  //   return BlogPage();
-                  // }));
+                  // MyRouter.router.navigateTo(
+                  //     context,
+                  //     "/notasds"
+                  // );
                 }),
           ],
         ),
@@ -162,7 +78,8 @@ class _HomePageState extends State<HomePage> {
 
 class AboutPage extends StatefulWidget {
   static const routName = "/about";
-  AboutPage({Key? key,this.id}) : super(key: key);
+
+  AboutPage({Key? key, this.id}) : super(key: key);
 
   final id;
 
@@ -178,22 +95,16 @@ class _AboutPageState extends State<AboutPage> {
           // automaticallyImplyLeading: false,
           ),
       body: Center(
-        child: widget.id != null
-        ? Text("About page ${widget.id}")
-        : Text("About page")
-        // child: RaisedButton(
-        //   child: Text("Вернуться назад"),
-        //   onPressed: (){
-        //     Navigator.of(context).pop();
-        //   },
-        // ),
-      ),
+          child: widget.id != null
+              ? Text("About page ${widget.id}")
+              : Text("About page")),
     );
   }
 }
 
 class BlogPage extends StatefulWidget {
   static const routName = "/blog";
+
   BlogPage({Key? key}) : super(key: key);
 
   @override
@@ -210,7 +121,7 @@ class _BlogPageState extends State<BlogPage> {
       body: Center(
         child: RaisedButton(
           child: Text("Вернуться назад"),
-          onPressed: (){
+          onPressed: () {
             Navigator.of(context).pop();
           },
         ),
@@ -218,6 +129,7 @@ class _BlogPageState extends State<BlogPage> {
     );
   }
 }
+
 class NotFoundPage extends StatefulWidget {
   NotFoundPage({Key? key}) : super(key: key);
 
