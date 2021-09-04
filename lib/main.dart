@@ -1,9 +1,12 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:fluro/fluro.dart';
-import 'package:navigation/fluro_router.dart';
+import 'package:navigation/home_views.dart';
+import 'package:navigation/profile_views.dart';
+
+import 'nav.dart';
 
 void main() {
-  MyRouter.setupRouter();
+  // MyRouter.setupRouter();
   runApp(MyApp());
 }
 
@@ -11,142 +14,82 @@ class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return CupertinoApp(
       debugShowCheckedModeBanner: false,
-      initialRoute: '/',
-      onUnknownRoute: (RouteSettings settings) {
-        return MaterialPageRoute(builder: (BuildContext context) {
-          return NotFoundPage();
-        });
-      },
-      onGenerateRoute: MyRouter.router.generator,
+      // initialRoute: '/',
+      // onUnknownRoute: (RouteSettings settings) {
+      //   return MaterialPageRoute(builder: (BuildContext context) {
+      //     return NotFoundPage();
+      //   });
+      // },
+      // onGenerateRoute: MyRouter.router.generator,
+      home: HomeView(),
     );
   }
 }
 
-class HomePage extends StatefulWidget {
-  static const routName = "/";
-
-  HomePage({Key? key}) : super(key: key);
+class HomeView extends StatefulWidget{
+  HomeView({Key? key}) : super(key: key);
 
   @override
-  _HomePageState createState() => _HomePageState();
+  _HomeViewState createState() => _HomeViewState();
 }
 
-class _HomePageState extends State<HomePage> {
+class _HomeViewState extends State<HomeView>{
+  int _routeIndex = 0;
+
+  List<GlobalKey<NavigatorState>>? navigationKeys;
+
+  List<GlobalKey<NavigatorState>> generateNavigationKeys() {
+    List<GlobalKey<NavigatorState>> navKeys = navs.map((navItem) {
+      return GlobalKey<NavigatorState>();
+    }).toList();
+    return navKeys;
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    navigationKeys = generateNavigationKeys();
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-        body: SafeArea(
-      // maintainBottomViewPadding: false,
-      child: Center(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            TextButton(
-                child: Text('About'),
-                onPressed: () {
-                  MyRouter.router.navigateTo(context, "/about",
-                      transition: TransitionType.cupertino);
-                }),
-            TextButton(
-              child: Text("About with arguments"),
-              onPressed: () {
-                MyRouter.router.navigateTo(context, "/blog");
-              },
-            ),
-            TextButton(
-                child: Text("Blog"),
-                onPressed: () {
-                  MyRouter.router.navigateTo(context, "/blog");
-                }),
-            TextButton(
-                child: Text("Not Found"),
-                onPressed: () {
-                  Navigator.of(context).pushNamed('/notasds');
-                  // MyRouter.router.navigateTo(
-                  //     context,
-                  //     "/notasds"
-                  // );
-                }),
-          ],
-        ),
+    return CupertinoTabScaffold(
+      tabBar: CupertinoTabBar(
+        currentIndex: _routeIndex,
+        onTap: (int index){
+          if(_routeIndex == index){
+            if(navigationKeys![index].currentState!.canPop()){
+              navigationKeys![index].currentState?.pop();
+            }
+          }
+          _routeIndex = index;
+        },
+        items: navs
+            .map(
+              (item) => BottomNavigationBarItem(
+            icon: Icon(item.icon),
+            title: Text(item.title),
+          ),
+        )
+            .toList(),
       ),
-    ));
-  }
-}
-
-class AboutPage extends StatefulWidget {
-  static const routName = "/about";
-
-  AboutPage({Key? key, this.id}) : super(key: key);
-
-  final id;
-
-  @override
-  _AboutPageState createState() => _AboutPageState();
-}
-
-class _AboutPageState extends State<AboutPage> {
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-          // automaticallyImplyLeading: false,
-          ),
-      body: Center(
-          child: widget.id != null
-              ? Text("About page ${widget.id}")
-              : Text("About page")),
-    );
-  }
-}
-
-class BlogPage extends StatefulWidget {
-  static const routName = "/blog";
-
-  BlogPage({Key? key}) : super(key: key);
-
-  @override
-  _BlogPageState createState() => _BlogPageState();
-}
-
-class _BlogPageState extends State<BlogPage> {
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-          // automaticallyImplyLeading: false,
-          ),
-      body: Center(
-        child: RaisedButton(
-          child: Text("Вернуться назад"),
-          onPressed: () {
-            Navigator.of(context).pop();
+      tabBuilder: (BuildContext context, int index){
+        return CupertinoTabView(
+          navigatorKey: navigationKeys![index],
+          builder: (BuildContext context) {
+            switch(index){
+              case 0:
+                return HomeViewPage();
+              case 1:
+                return ProfileView();
+              default:
+                return HomeView();
+            }
           },
-        ),
-      ),
+        );
+      },
     );
   }
-}
-
-class NotFoundPage extends StatefulWidget {
-  NotFoundPage({Key? key}) : super(key: key);
-
-  @override
-  _NotFoundPageState createState() => _NotFoundPageState();
-}
-
-class _NotFoundPageState extends State<NotFoundPage> {
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-          // automaticallyImplyLeading: false,
-          ),
-      body: Center(
-        child: Text("Not Found page"),
-      ),
-    );
   }
-}
