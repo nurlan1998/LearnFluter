@@ -1,12 +1,11 @@
+import 'dart:convert';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:navigation/home_views.dart';
-import 'package:navigation/profile_views.dart';
-
-import 'nav.dart';
+import 'package:http/http.dart' as http;
+import 'package:navigation/user.dart';
+import 'package:dio/dio.dart';
 
 void main() {
-  // MyRouter.setupRouter();
   runApp(MyApp());
 }
 
@@ -14,82 +13,120 @@ class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    return CupertinoApp(
-      debugShowCheckedModeBanner: false,
-      // initialRoute: '/',
-      // onUnknownRoute: (RouteSettings settings) {
-      //   return MaterialPageRoute(builder: (BuildContext context) {
-      //     return NotFoundPage();
-      //   });
-      // },
-      // onGenerateRoute: MyRouter.router.generator,
-      home: HomeView(),
+    return MaterialApp(
+      title: "Internet",
+      theme: ThemeData(
+        primarySwatch: Colors.blue,
+        visualDensity: VisualDensity.adaptivePlatformDensity,
+      ),
+      home: MyHomePage(title: "Internet",),
     );
   }
 }
 
-class HomeView extends StatefulWidget{
-  HomeView({Key? key}) : super(key: key);
+class MyHomePage extends StatefulWidget{
+  MyHomePage({Key? key,required this.title}): super(key: key);
+
+  final String title;
 
   @override
-  _HomeViewState createState() => _HomeViewState();
+  _MyHomePageState createState() => _MyHomePageState();
 }
 
-class _HomeViewState extends State<HomeView>{
-  int _routeIndex = 0;
-
-  List<GlobalKey<NavigatorState>>? navigationKeys;
-
-  List<GlobalKey<NavigatorState>> generateNavigationKeys() {
-    List<GlobalKey<NavigatorState>> navKeys = navs.map((navItem) {
-      return GlobalKey<NavigatorState>();
-    }).toList();
-    return navKeys;
-  }
+class _MyHomePageState extends State<MyHomePage>{
+  bool isLoading = false;
+  bool hasError = false;
+  late String errorMessage;
+  late List<User> users;
+  Dio _dio = Dio();
 
   @override
   void initState() {
     super.initState();
-    navigationKeys = generateNavigationKeys();
+    // getDataHttp();
+    getDataDio();
   }
+
+  getDataDio() async {
+    setState(() {
+      isLoading = true;
+    });
+    try{
+      final response = await _dio.get("https://run.mocky.io/v3/af5ffb01-5cc0-4b87-95b5-47b0fcce1c96");
+      var data = response.data;
+      users = data.map<User>((user) => User.fromJson(user)).toList();
+
+    }on DioError catch(e){
+      print(e.response!.data['message']);
+      setState(() {
+        errorMessage = e.response!.data['message'];
+        hasError = true;
+        isLoading = false;
+      });
+    }
+
+    setState(() {
+      isLoading = false;
+    });
+  }
+
+  // getDataHttp() async{
+  //
+  //   try{
+  //     final response = await http
+  //     .get(Uri.parse('https://run.mocky.io/v3/af5ffb01-5cc0-4b87-95b5-47b0fcce1c96'));//200
+  //     //     .get(Uri.parse('https://run.mocky.io/v3/e4e4904b-7ca8-4893-9caa-d5ea304f0f51'));
+  //     var data = json.decode(response.body);
+  //     users = data.map<User>((user) => User.fromJson(user)).toList();
+  //   }catch(e){
+  //     setState(() {
+  //       hasError = true;
+  //     });
+  //   }
+  //   setState(() {
+  //     isLoading = false;
+  //   });
+  // }
 
   @override
   Widget build(BuildContext context) {
-    return CupertinoTabScaffold(
-      tabBar: CupertinoTabBar(
-        currentIndex: _routeIndex,
-        onTap: (int index){
-          if(_routeIndex == index){
-            if(navigationKeys![index].currentState!.canPop()){
-              navigationKeys![index].currentState?.pop();
-            }
-          }
-          _routeIndex = index;
-        },
-        items: navs
-            .map(
-              (item) => BottomNavigationBarItem(
-            icon: Icon(item.icon),
-            title: Text(item.title),
-          ),
-        )
-            .toList(),
+
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(widget.title),
       ),
-      tabBuilder: (BuildContext context, int index){
-        return CupertinoTabView(
-          navigatorKey: navigationKeys![index],
-          builder: (BuildContext context) {
-            switch(index){
-              case 0:
-                return HomeViewPage();
-              case 1:
-                return ProfileView();
-              default:
-                return HomeView();
-            }
-          },
-        );
-      },
-    );
+      body: Column(
+        children: [
+          if(!isLoading && hasError) Text(errorMessage),
+          if(!isLoading && hasError == false)
+          Expanded(
+              child: ListView(
+            children: [
+              ...users.map((user) {
+                return ListTile(
+                  title: Text(user.email),
+                  subtitle: Text(user.name),
+                );
+              }).toList()
+            ],
+          ))
+        ],
+      )
+      );
+      //     ? Center(
+      //         child: CircularProgressIndicator(),
+      // ) : hasError
+      //   ? Text('Error')
+      //     :ListView(
+      //   children: <Widget>[
+      //     ...users.map((user){
+      //       return ListTile(
+      //       title: Text(user.email),
+      //         subtitle: Text(user.name),
+      //       );
+      //     }).toList(),
+    //     ],
+    //   ),
+    // );
   }
-  }
+}
