@@ -34,7 +34,7 @@ class MyHomePage extends StatefulWidget{
 }
 
 class _MyHomePageState extends State<MyHomePage>{
-  bool isLoading = false;
+  bool isLoading = true;
   bool hasError = false;
   late String errorMessage;
   late List<User> users;
