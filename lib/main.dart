@@ -5,6 +5,8 @@ import 'package:http/http.dart' as http;
 import 'package:navigation/user.dart';
 import 'package:dio/dio.dart';
 
+import 'login_view.dart';
+
 void main() {
   runApp(MyApp());
 }
@@ -19,7 +21,12 @@ class MyApp extends StatelessWidget {
         primarySwatch: Colors.blue,
         visualDensity: VisualDensity.adaptivePlatformDensity,
       ),
-      home: MyHomePage(title: "Internet",),
+      initialRoute: '/',
+      routes: {
+        '/': (BuildContext context) => LoginView(),
+        '/home': (BuildContext context) =>
+            MyHomePage(title: "Flutter Demo Home Page"),
+      },
     );
   }
 }
